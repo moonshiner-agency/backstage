@@ -46,6 +46,7 @@ export class DefaultProcessingDatabase implements ProcessingDatabase {
   constructor(
     private readonly database: Knex,
     private readonly logger: Logger,
+    private readonly refreshIntervalSeconds: number,
   ) {}
 
   async updateProcessedEntity(
@@ -354,7 +355,6 @@ export class DefaultProcessingDatabase implements ProcessingDatabase {
     request: { processBatchSize: number },
   ): Promise<GetProcessableEntitiesResult> {
     const tx = txOpaque as Knex.Transaction;
-
     const items = await tx<DbRefreshStateRow>('refresh_state')
       .select()
       .where('next_update_at', '<=', tx.fn.now())
@@ -369,8 +369,14 @@ export class DefaultProcessingDatabase implements ProcessingDatabase {
       .update({
         next_update_at:
           tx.client.config.client === 'sqlite3'
-            ? tx.raw(`datetime('now', ?)`, [`100 seconds`])
-            : tx.raw(`now() + interval '100 seconds'`),
+            ? tx.raw(`datetime('now', ?)`, [
+                `${this.refreshIntervalSeconds} seconds`,
+              ])
+            : tx.raw(
+                `now() + interval '${Number(
+                  this.refreshIntervalSeconds,
+                )} seconds'`,
+              ),
       });
 
     return {
