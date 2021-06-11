@@ -1,5 +1,14 @@
 # @backstage/create-app
 
+## 0.3.26
+
+### Patch Changes
+
+- Updated dependencies [42a2d2ebc]
+- Updated dependencies [667656c8b]
+  - @backstage/plugin-user-settings@0.2.11
+  - @backstage/plugin-techdocs@0.9.6
+
 ## 0.3.25
 
 ### Patch Changes
